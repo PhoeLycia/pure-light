@@ -1,1 +1,0 @@
-Publish-Module -Path $PSScriptRoot/pure-pwsh -NuGetApiKey $env:PSNugetKey -Verbose
