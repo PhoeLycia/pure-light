@@ -1,12 +1,12 @@
 @{
-  RootModule        = 'pure-pwsh.psm1'
-  ModuleVersion     = '0.8.0'
-  GUID              = '94d168c3-c48f-4937-bc82-4d54b5b9e777'
+  RootModule        = 'pure-light.psm1'
+  ModuleVersion     = '0.1.0'
+  GUID              = 'c0906cb2-b8de-4323-b3a8-a517cf5bc8eb'
 
-  Author            = 'Nick Cox'
+  Author            = 'Phoe Lycia'
   Copyright         = '(c) Nick Cox. All rights reserved.'
   Description       = 'pure prompt for powershell'
-  PowerShellVersion = '7.0'
+  PowerShellVersion = '5.1'
 
   VariablesToExport = 'pure'
 
@@ -14,7 +14,7 @@
     PSData = @{
       Tags       = @('pure', 'prompt')
       LicenseUri = 'https://github.com/nickcox/pure-pwsh/blob/master/LICENSE'
-      ProjectUri = 'https://github.com/nickcox/pure-pwsh'
+      ProjectUri = 'https://github.com/PhoeLycia/pure-light'
     }
   }
 }

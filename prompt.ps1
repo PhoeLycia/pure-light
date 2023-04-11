@@ -1,55 +1,23 @@
-filter fmtColor($color) { $_ ? "$color$_`e[0m" : '' }
+#filter fmtColor($color) { $_ ? "${color}$_`e[0m" : '' }
+filter fmtColor($color) { if ($_) { "${color}$_`e[0m" } else { '' } }
 
 function global:prompt {
-  $isError = !$?
+    [bool]$isError = !$?
+    $userName = [System.Environment]::UserName
 
-  $prevrepoDir = $pure._state.repoDir
-  $repoDir = $pure._state.repoDir = GetRepoDir
-  $hasRepoChanged = $repoDir -and ($repoDir -ne $prevrepoDir)
-
-  if ($repoDir) {
-    $watcher.Path = $repoDir
-    $watcher.EnableRaisingEvents = $true
-    $Script:fetchTimer.Enabled = $pure.FetchInterval -gt 0
-  }
-  else {
-    $watcher.EnableRaisingEvents = $false
-    $Script:fetchTimer.Enabled = $false
-    $pure._state.status = $Script:emptyStatus
-  }
-
-  # disptach a change event if we enetered a new repository
-  if ($hasRepoChanged) { &$pure._functions.updateStatus }
-
-  # otherwise we already have all the info we need
-  $status = $pure._state.status
-  $gitInfo = if ($repoDir -and !$hasRepoChanged) {
-    $branchName = &$pure.BranchFormatter $status.branch
-    $dirtyMark = if ($status.dirty) { "*" }
-
-    ($branchName | fmtColor $pure._branchColor) + ($dirtyMark | fmtColor $pure._dirtyColor)
-
-    $remote = if ($status.behind) { $pure.downChar }
-    $remote += if ($status.ahead) { $pure.upChar }
-
-    if ($remote) { $remote | fmtColor $pure._remoteColor }
-  }
-  elseif ($hasRepoChanged) { $pure.PendingChar | fmtColor $pure._branchColor }
-
-  $slowInfo = if ($pure.SlowCommandTime -gt 0 -and ($lastCmd = Get-History -Count 1)) {
-    $diff = $lastCmd.EndExecutionTime - $lastCmd.StartExecutionTime
-    if ($diff -gt $pure.SlowCommandTime) {
-      '({0})' -f ('{0:hh\:mm\:ss\s}' -f $diff).TrimStart(':0') | fmtColor $pure._timeColor
+    $slowInfo = if ($pure.SlowCommandTime -gt 0 -and ($lastCmd = Get-History -Count 1)) {
+        $diff = $lastCmd.EndExecutionTime - $lastCmd.StartExecutionTime
+        if ($diff -gt $pure.SlowCommandTime) {
+            '({0})' -f ('{0:hh\:mm\:ss\s}' -f $diff).TrimStart(':0') | fmtColor $pure._timeColor
+        }
     }
-  }
 
-  if ($pure.WindowTitle) { $host.UI.RawUI.WindowTitle = &$pure.WindowTitle }
+    #$promptColor = $isError ? $pure._errorColor : $pure._promptColor
+    $promptColor = if ($isError) { $pure._errorColor } else { $pure._promptColor }
+    $userColor = if ($userName -eq 'root') { $pure._userRootColor } else { $pure._userColor }
+    $user = &$pure.userFormatter $userName | fmtColor $userColor
+    #$cwd = &$pure.pwdFormatter $($executionContext.SessionState.Path.CurrentLocation) | fmtColor $pure._pwdColor
+    $cwd = &$pure.pwdFormatter $PWD.Path | fmtColor $pure._pwdColor
 
-  $promptColor = ($isError) ? $pure._errorColor : $pure._promptColor
-  $cwd = &$pure.PwdFormatter $PWD.Path | fmtColor $pure._pwdColor
-  $user = &$pure.UserFormatter $env:SSH_CONNECTION ($env:USERNAME ?? $env:USER) ($env:COMPUTERNAME ?? (hostname)) |
-    fmtColor $pure._userColor
-
-  (&$pure.PrePrompt $user $cwd $gitInfo $slowInfo ) +
-  ($pure.PromptChar | fmtColor $promptColor) + " "
+    (&$pure.PrePrompt $user, $cwd, $slowInfo) + ($pure.PromptChar | fmtColor $promptColor) + ' '
 }
