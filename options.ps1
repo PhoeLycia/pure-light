@@ -44,7 +44,7 @@ class PureLight {
     hidden [timespan] $_slowCommandTime = [timespan]::FromSeconds(5)
     hidden [scriptblock] $_prePrompt = { param ($user, $cwd, $slow) "`n${user} ${cwd} ${slow}`n" }
     
-    [scriptblock] $userFormatter = { param ($user) if ($user -eq 'root') {'!ROOT'} else {$user} }
+    [scriptblock] $userFormatter = { param ($user) if ($user -eq 'root') { '!ROOT' } else { $user } }
     [scriptblock] $pwdFormatter = { $args -replace "${HOME}", '~' }
 
     hidden [void] updatePSReadLine() {
