@@ -1,5 +1,5 @@
-#filter fmtColor($color) { $_ ? "${color}$_`e[0m" : '' }
-filter fmtColor($color) { if ($_) { "${color}$_$([char]0x1b)[0m" } else { '' } }
+filter fmtColor($color) { $_ ? "${color}$_`e[0m" : '' }
+#filter fmtColor($color) { if ($_) { "${color}$_$([char]0x1b)[0m" } else { '' } }
 
 function global:prompt {
     [bool]$isError = !$?
@@ -12,9 +12,10 @@ function global:prompt {
         }
     }
 
-    #$promptColor = $isError ? $pure._errorColor : $pure._promptColor
-    $promptColor = if ($isError) { $pure._errorColor } else { $pure._promptColor }
-    $userColor = if ($userName -eq 'root') { $pure._userRootColor } else { $pure._userColor }
+    $promptColor = $isError ? $pure._errorColor : $pure._promptColor
+    #$promptColor = if ($isError) { $pure._errorColor } else { $pure._promptColor }
+    $userColor = ($userName -eq 'root') ? $pure._userRootColor : $pure._userColor
+    #$userColor = if ($userName -eq 'root') { $pure._userRootColor } else { $pure._userColor }
     $user = &$pure.userFormatter $userName | fmtColor $userColor
     #$cwd = &$pure.pwdFormatter $($executionContext.SessionState.Path.CurrentLocation) | fmtColor $pure._pwdColor
     $cwd = &$pure.pwdFormatter $PWD.Path | fmtColor $pure._pwdColor

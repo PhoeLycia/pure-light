@@ -27,14 +27,16 @@ AnsiFgColor {
 
 class PureLight {
     static hidden [string] ansiSeq([int]$style, [int]$fgColor) {
-        return "$([char]0x1b)[{0};{1}m" -f $style, $fgColor
+        return "`e[{0};{1}m" -f $style, $fgColor
     }
     static hidden [timespan] timeSpan($value) {
-        #return ($value -is [Int]) ? [timespan]::FromSeconds($value) : [timespan]$value
+        return ($value -is [Int]) ? [timespan]::FromSeconds($value) : [timespan]$value
+        <#
         if ($value -is [Int]) { return [timeSpan]::FromSeconds($value) }
         return [timeSpan]$value
+        #>
     }
-    hidden [char] $_promptChar = '>'
+    hidden [char] $_promptChar = '❯'
     hidden [string] $_promptColor = [PureLight]::ansiSeq(0, 95)  #Magenta
     hidden [string] $_errorColor = [PureLight]::ansiSeq(0, 91)  #Red
     hidden [string] $_pwdColor = [PureLight]::ansiSeq(0, 36)  #DarkCyan
@@ -44,7 +46,8 @@ class PureLight {
     hidden [timespan] $_slowCommandTime = [timespan]::FromSeconds(5)
     hidden [scriptblock] $_prePrompt = { param ($user, $cwd, $slow) "`n${user} ${cwd} ${slow}`n" }
     
-    [scriptblock] $userFormatter = { param ($user) if ($user -eq 'root') { '!ROOT' } else { $user } }
+    [scriptblock] $userFormatter = { param ($user) ($user -eq 'root') ? '!ROOT' : $user }
+    #[scriptblock] $userFormatter = { param ($user) if ($user -eq 'root') { '!ROOT' } else { $user } }
     [scriptblock] $pwdFormatter = { $args -replace "${HOME}", '~' }
 
     hidden [void] updatePSReadLine() {
@@ -55,7 +58,7 @@ class PureLight {
     hidden [void] addColorProperty([string] $shortName) {
         $name = "${shortName}Color"
         Add-Member -InputObject $this -Name $name -MemberType ScriptProperty -Value {
-            $this."_$name" + "*$([char]0x1b)[0m" # coloured asterisk for display purposes
+            $this."_$name" + "*`e[0m" # coloured asterisk for display purposes
         }.GetNewClosure() -SecondValue {
             param([Int]$style, [Int]$fgColor)
             $this."_$name" = [PureLight]::ansiSeq($style, $fgColor)
