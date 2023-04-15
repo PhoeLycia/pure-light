@@ -58,7 +58,7 @@ class PureLight {
             $this."_$name" + "*$([char]0x1b)[0m" # coloured asterisk for display purposes
         }.GetNewClosure() -SecondValue {
             param([Int]$style, [Int]$fgColor)
-            $this."_$name" = [PureLight]::ansiSequence($style, $fgColor)
+            $this."_$name" = [PureLight]::ansiSeq($style, $fgColor)
             $this.updatePSReadLine()
         }.GetNewClosure()
     }
