@@ -1,5 +1,5 @@
 #filter fmtColor($color) { $_ ? "${color}$_`e[0m" : '' }
-filter fmtColor($color) { if ($_) { "${color}$_`e[0m" } else { '' } }
+filter fmtColor($color) { if ($_) { "${color}$_$([char]0x1b)[0m" } else { '' } }
 
 function global:prompt {
     [bool]$isError = !$?

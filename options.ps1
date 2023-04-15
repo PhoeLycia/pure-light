@@ -27,14 +27,14 @@ AnsiFgColor {
 
 class PureLight {
     static hidden [string] ansiSeq([int]$style, [int]$fgColor) {
-        return "`e[{0};{1}m" -f $style, $fgColor
+        return "$([char]0x1b)[{0};{1}m" -f $style, $fgColor
     }
     static hidden [timespan] timeSpan($value) {
         #return ($value -is [Int]) ? [timespan]::FromSeconds($value) : [timespan]$value
         if ($value -is [Int]) { return [timeSpan]::FromSeconds($value) }
         return [timeSpan]$value
     }
-    hidden [char] $_promptChar = '❯'
+    hidden [char] $_promptChar = '>'
     hidden [string] $_promptColor = [PureLight]::ansiSeq(0, 95)  #Magenta
     hidden [string] $_errorColor = [PureLight]::ansiSeq(0, 91)  #Red
     hidden [string] $_pwdColor = [PureLight]::ansiSeq(0, 36)  #DarkCyan
@@ -55,7 +55,7 @@ class PureLight {
     hidden [void] addColorProperty([string] $shortName) {
         $name = "${shortName}Color"
         Add-Member -InputObject $this -Name $name -MemberType ScriptProperty -Value {
-            $this."_$name" + "*`e[0m" # coloured asterisk for display purposes
+            $this."_$name" + "*$([char]0x1b)[0m" # coloured asterisk for display purposes
         }.GetNewClosure() -SecondValue {
             param([Int]$style, [Int]$fgColor)
             $this."_$name" = [PureLight]::ansiSequence($style, $fgColor)
